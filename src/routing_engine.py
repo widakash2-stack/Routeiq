@@ -273,6 +273,8 @@ class ContextualBanditStore:
         s["alpha"] *= decay
         s["beta"] *= decay
         s["ts"] = current_ts()
+        s["alpha"] = max(0.01, s["alpha"])
+        s["beta"]  = max(0.01, s["beta"])
 
     def _key(self, ctx):
         return (ctx["country"], ctx["payment_method"], ctx["time_bucket"])
@@ -284,7 +286,9 @@ class ContextualBanditStore:
 
     def sample(self, ctx, psp):
         s = self.get_stats(ctx, psp)
-        return random.betavariate(s["alpha"], s["beta"])
+        alpha = max(0.01, s["alpha"])
+        beta  = max(0.01, s["beta"])
+        return random.betavariate(alpha, beta)
 
     def update(self, ctx, psp, reward):
         key = self._key(ctx)
@@ -317,6 +321,8 @@ class RegionalBanditStore:
         s["alpha"] *= decay
         s["beta"] *= decay
         s["ts"] = current_ts()
+        s["alpha"] = max(0.01, s["alpha"])
+        s["beta"]  = max(0.01, s["beta"])
 
     def get_stats(self, key, psp):
         s = self.stats[key][psp]
@@ -325,7 +331,9 @@ class RegionalBanditStore:
 
     def sample(self, key, psp):
         s = self.get_stats(key, psp)
-        return random.betavariate(s["alpha"], s["beta"])
+        alpha = max(0.01, s["alpha"])
+        beta  = max(0.01, s["beta"])
+        return random.betavariate(alpha, beta)
 
     def update(self, key, psp, reward):
         s = self.stats[key][psp]
@@ -445,7 +453,7 @@ class Router:
                 continue
 
             s = local_stats[psp]
-            alpha, beta = s["alpha"], s["beta"]
+            alpha, beta = max(0.01, s["alpha"]), max(0.01, s["beta"])
 
             # Thompson samples from all three levels
             local_sample    = random.betavariate(alpha, beta)
@@ -682,9 +690,9 @@ def route_transaction_with_trace(transaction):
         reg_s   = bandit_regional.get_stats(region, psp)
         glob_s  = bandit_global.get_stats("global", psp)
 
-        local_sample    = random.betavariate(local_s["alpha"], local_s["beta"])
-        regional_sample = random.betavariate(reg_s["alpha"],   reg_s["beta"])
-        global_sample   = random.betavariate(glob_s["alpha"],  glob_s["beta"])
+        local_sample    = random.betavariate(max(0.01, local_s["alpha"]), max(0.01, local_s["beta"]))
+        regional_sample = random.betavariate(max(0.01, reg_s["alpha"]),   max(0.01, reg_s["beta"]))
+        global_sample   = random.betavariate(max(0.01, glob_s["alpha"]),  max(0.01, glob_s["beta"]))
 
         hierarchical = 0.5 * local_sample + 0.3 * regional_sample + 0.2 * global_sample
 
