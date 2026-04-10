@@ -813,6 +813,16 @@ if route_clicked:
 
     try:
         selected_psp, trace = route_transaction_with_trace(txn)
+        if selected_psp is None:
+            st.error("No PSP available for this route")
+        else:
+            pass  # proceed below
+    except Exception as e:
+        st.error(f"Routing error: {str(e)}")
+        selected_psp = None
+        trace = {}
+
+    if selected_psp is not None:
         ranking   = trace.get("psp_ranking", [])
         reason    = trace.get("reason", "")
         is_opt    = selected_psp == trace.get("best_psp")
@@ -821,21 +831,22 @@ if route_clicked:
         badge = '<span class="badge-optimal">Optimal</span>' if is_opt else '<span class="badge-explore">Exploration</span>'
 
         # ── Simulate outcome ──────────────────────────────────────────────
-        TAKE_RATE       = 0.015
+        TAKE_RATE        = 0.015
         psp_success_rate = _psp_success_rate.get(selected_psp, 0.75)
-        base_cost        = _psp_base_cost.get(selected_psp, 1.80)
         base_latency     = _psp_base_latency.get(selected_psp, 1000)
 
         outcome_success  = random.random() < psp_success_rate
         latency_ms       = round(base_latency * random.uniform(0.8, 1.2))
 
         revenue          = amount * TAKE_RATE
+        psp_cost         = _psp_base_cost.get(selected_psp, 1.5)
         latency_penalty  = latency_ms / 100000
         if outcome_success:
-            reward = revenue - base_cost - latency_penalty
+            reward = revenue - psp_cost - latency_penalty
         else:
-            reward = -(base_cost + revenue * 0.5 + latency_penalty)
-        reward = round(reward, 4)
+            failure_cost = revenue * 0.5
+            reward = -(psp_cost + failure_cost + latency_penalty)
+        reward = max(-100, min(100, round(reward, 4)))
 
         # Feed outcome back to the bandit
         update_bandit((country, payment_method), selected_psp, reward)
@@ -927,9 +938,6 @@ if route_clicked:
 
             rdf.index = range(1, len(rdf) + 1)
             st.dataframe(rdf.style.apply(_colour_final, axis=1), use_container_width=True)
-
-    except Exception as e:
-        st.error(f"Routing error: {e}")
 
 st.divider()
 
