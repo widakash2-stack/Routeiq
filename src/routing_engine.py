@@ -562,7 +562,11 @@ def _deserialise_into(store_stats, data):
         except:
             key = key_str
         for psp, s in psps.items():
-            store_stats[key][psp] = s
+            store_stats[key][psp] = {
+                "alpha": max(0.01, min(1000, float(s.get("alpha", 1.0)))),
+                "beta":  max(0.01, min(1000, float(s.get("beta",  1.0)))),
+                "ts":    current_ts(),
+            }
 
 
 def save_bandit_state():

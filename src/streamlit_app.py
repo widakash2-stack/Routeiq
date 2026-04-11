@@ -13,6 +13,7 @@ from routing_engine import route_transaction_with_trace, update_bandit
 
 st.set_page_config(
     page_title="RouteIQ — Intelligent Payment Routing",
+    page_icon="💳",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -309,12 +310,37 @@ tbody td { font-size: 13px !important; color: #1E293B !important; }
 """, unsafe_allow_html=True)
 
 # ── Data ────────────────────────────────────────────────────────────────────
-REPLAY_PATH       = os.path.join(CURRENT_DIR, "replay_results.csv")
-DECISION_LOG_PATH = os.path.join(CURRENT_DIR, "decision_log.csv")
-PSP_DATA_PATH     = os.path.join(CURRENT_DIR, "../data/payment_data.csv")
+REPLAY_RESULTS_PATH = os.path.join(CURRENT_DIR, "replay_results.csv")
+DECISION_LOG_PATH   = os.path.join(CURRENT_DIR, "decision_log.csv")
+PSP_DATA_PATH       = os.path.join(CURRENT_DIR, "../data/payment_data.csv")
 
-df      = pd.read_csv(REPLAY_PATH)
-psp_df  = pd.read_csv(PSP_DATA_PATH)
+
+@st.cache_data(ttl=300)
+def load_decision_log():
+    try:
+        return pd.read_csv(DECISION_LOG_PATH)
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def load_replay_results():
+    try:
+        return pd.read_csv(REPLAY_RESULTS_PATH)
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=3600)
+def load_psp_data():
+    try:
+        return pd.read_csv(PSP_DATA_PATH)
+    except Exception:
+        return pd.DataFrame()
+
+
+df      = load_replay_results()
+psp_df  = load_psp_data()
 
 # PSP lookup dicts used by the live routing simulator
 _psp_success_rate = psp_df.groupby("psp")["success_rate"].mean().to_dict()
@@ -396,7 +422,7 @@ st.markdown(f"""
 st.markdown('<div class="section-title">Revenue Intelligence</div>', unsafe_allow_html=True)
 
 if os.path.exists(DECISION_LOG_PATH):
-    _dl_profit = pd.read_csv(DECISION_LOG_PATH)
+    _dl_profit = load_decision_log()
 
     # ── Build profit figures ─────────────────────────────────────────────
     TAKE_RATE = 0.015
@@ -642,7 +668,7 @@ st.markdown('<div class="section-title">Learning Improvement — Early vs Late</
 st.markdown('<div class="ab-subtitle">Proving the system gets smarter over time</div>', unsafe_allow_html=True)
 
 if os.path.exists(DECISION_LOG_PATH):
-    dl_ab = pd.read_csv(DECISION_LOG_PATH)
+    dl_ab = load_decision_log()
 
     # Need psp_data for scoring — build same lookups as replay_engine
     _psp_df_ab = psp_df.copy()
@@ -1105,7 +1131,7 @@ st.divider()
 st.markdown('<div class="section-title">PSP Health Monitor</div>', unsafe_allow_html=True)
 
 if os.path.exists(DECISION_LOG_PATH):
-    dl_health = pd.read_csv(DECISION_LOG_PATH)
+    dl_health = load_decision_log()
     dl_health["outcome_bool"] = dl_health["outcome"].apply(
         lambda x: True if str(x).lower() == "success" else False
     )
@@ -1178,7 +1204,7 @@ st.divider()
 st.markdown('<div class="section-title">System Performance</div>', unsafe_allow_html=True)
 
 if os.path.exists(DECISION_LOG_PATH):
-    dl = pd.read_csv(DECISION_LOG_PATH)
+    dl = load_decision_log()
     best_lookup = (
         psp_df.sort_values("success_rate", ascending=False)
         .groupby(["country", "payment_method"])["psp"]
@@ -1304,7 +1330,8 @@ geo_df["region"] = geo_df["chosen_psp"].map(_psp_primary_country).map(_country_r
 has_reward = "reward" not in df.columns  # replay_results doesn't have reward; load from decision_log
 _dl_reward = None
 if os.path.exists(DECISION_LOG_PATH):
-    _dl_reward = pd.read_csv(DECISION_LOG_PATH, usecols=["txn_id", "reward"] if "reward" in pd.read_csv(DECISION_LOG_PATH, nrows=1).columns else ["txn_id"])
+    _tmp_dl = load_decision_log()
+    _dl_reward = _tmp_dl[["txn_id", "reward"]] if "reward" in _tmp_dl.columns else _tmp_dl[["txn_id"]]
 
 if _dl_reward is not None and "reward" in _dl_reward.columns:
     geo_df = geo_df.merge(_dl_reward[["txn_id", "reward"]], on="txn_id", how="left")
