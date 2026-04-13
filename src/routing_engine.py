@@ -11,7 +11,7 @@ from collections import defaultdict
 # CONFIG
 # =========================
 
-DECAY_LAMBDA = 0.001
+DECAY_LAMBDA = 0.000001
 SHARE_PENALTY_EXPONENT = 2
 
 MIN_PSP_SHARE = 0.01
