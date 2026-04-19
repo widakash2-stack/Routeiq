@@ -460,7 +460,7 @@ if os.path.exists(DECISION_LOG_PATH):
     st.markdown(f"""
     <div style="display:flex; gap:16px; margin-bottom:1.5rem;">
       <div class="kpi-card kpi-card-blue" style="flex:1;">
-        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-label">GMV Routed</div>
         <div class="kpi-value kpi-value-blue">${total_revenue:,.2f}</div>
         <div style="font-size:11px;color:#94A3B8;margin-top:3px;">from successful txns × 1.5%</div>
       </div>
@@ -470,7 +470,7 @@ if os.path.exists(DECISION_LOG_PATH):
         <div style="font-size:11px;color:#94A3B8;margin-top:3px;">base cost per transaction</div>
       </div>
       <div class="kpi-card" style="flex:1; border-left:4px solid {margin_color};">
-        <div class="kpi-label">Net Profit</div>
+        <div class="kpi-label">Net After PSP Fees</div>
         <div style="font-size:22px;font-weight:700;color:{margin_color};margin-top:4px;letter-spacing:-0.5px;">
           {margin_sign}${abs(net_profit):,.2f}
         </div>

@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<!-- saved from url=(0031)https://tryrouteiq.netlify.app/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style>body {transition: opacity ease-in 0.2s; } 
+body[unresolved] {opacity: 0; display: block; overflow: hidden; position: relative; } 
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RouteIQ — Intelligent Payment Routing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080B10;
+    --navy: #0D1117;
+    --card: #111827;
+    --border: #1F2937;
+    --gold: #F59E0B;
+    --gold-dim: #92400E;
+    --white: #F9FAFB;
+    --muted: #6B7280;
+    --green: #10B981;
+    --red: #EF4444;
+    --blue: #3B82F6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(8, 11, 16, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--gold); }
+
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  .nav-cta {
+    background: var(--gold);
+    color: var(--black);
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s;
+  }
+
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245, 158, 11, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+  }
+
+  h1 .accent { color: var(--gold); }
+
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 48px;
+    max-width: 560px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--black);
+    padding: 16px 32px;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+  }
+
+  .btn-secondary {
+    color: var(--white);
+    padding: 16px 32px;
+    border-radius: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* HERO TERMINAL */
+  .hero-terminal {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  }
+
+  .terminal-header {
+    padding: 14px 20px;
+    background: var(--navy);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .terminal-body {
+    padding: 24px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .t-label { color: var(--muted); }
+  .t-value { color: var(--white); }
+  .t-gold { color: var(--gold); font-weight: 500; }
+  .t-green { color: var(--green); }
+  .t-red { color: var(--red); }
+
+  .t-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .t-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--navy);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 60px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: -2px;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 100px 60px;
+  }
+
+  .section-tag {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+    font-weight: 300;
+  }
+
+  /* PROBLEM SECTION */
+  .problem {
+    background: var(--navy);
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .problem-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .problem-stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    padding: 24px 28px;
+    border-radius: 8px;
+  }
+
+  .problem-stat .big-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--red);
+    letter-spacing: -1px;
+  }
+
+  .problem-stat p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* HOW IT WORKS */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 60px;
+  }
+
+  .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 32px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .step:hover {
+    border-color: var(--gold);
+  }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    color: rgba(245, 158, 11, 0.1);
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    line-height: 1;
+  }
+
+  .step-icon {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+  }
+
+  .step p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* INTELLIGENCE LAYERS */
+  .layers-section {
+    background: var(--navy);
+  }
+
+  .layers-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .layer-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    transition: all 0.3s;
+  }
+
+  .layer-card:hover {
+    border-color: rgba(245, 158, 11, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .layer-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .layer-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .layer-card p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* RESULTS */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 32px;
+    text-align: center;
+  }
+
+  .result-card .metric {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: -2px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .result-card .metric-label {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .result-card .metric-desc {
+    font-size: 12px;
+    color: rgba(107, 114, 128, 0.7);
+    margin-top: 8px;
+  }
+
+  /* MARKETS */
+  .markets-section {
+    background: var(--navy);
+  }
+
+  .markets-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 60px;
+  }
+
+  .market-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+  }
+
+  .market-region {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .market-osr {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+
+  .market-countries {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    padding: 120px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-size: clamp(36px, 5vw, 60px);
+    margin-bottom: 20px;
+  }
+
+  .cta-section p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.6s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* COUNTER */
+  .counter { display: inline-block; }
+
+  /* ROUTING DEMO */
+  .demo-section {
+    background: var(--black);
+  }
+
+  .demo-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .demo-header {
+    background: var(--navy);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .demo-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    margin-left: auto;
+  }
+
+  .demo-body {
+    padding: 32px;
+  }
+
+  .routing-flow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .flow-box {
+    background: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .flow-box .flow-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .flow-box .flow-value {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .flow-arrow {
+    color: var(--gold);
+    font-size: 18px;
+  }
+
+  .result-box {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .result-psp {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--green);
+  }
+
+  .result-details {
+    text-align: right;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .result-details .profit {
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  @media (max-width: 1100px) {
+    .hero-terminal { display: none; }
+    .hero-content { max-width: 100%; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .hero, section { padding: 80px 24px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 40px 24px; }
+    .steps, .results-grid { grid-template-columns: 1fr; }
+    .layers-grid { grid-template-columns: 1fr; }
+    .markets-grid { grid-template-columns: repeat(2, 1fr); }
+    .problem-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Route<span>IQ</span></div>
+  <ul class="nav-links">
+    <li><a href="https://tryrouteiq.netlify.app/#how">How it works</a></li>
+    <li><a href="https://tryrouteiq.netlify.app/#intelligence">Intelligence</a></li>
+    <li><a href="https://tryrouteiq.netlify.app/#results">Results</a></li>
+    <li><a href="https://tryrouteiq.netlify.app/#markets">Markets</a></li>
+  </ul>
+  <a href="https://routeiq.streamlit.app/" target="_blank" class="nav-cta">Live Demo →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">AI-Powered Routing · Live System</div>
+
+    <h1>
+      Stop losing revenue<br>
+      to <span class="accent">wrong PSP</span><br>
+      decisions.
+    </h1>
+
+    <p class="hero-sub">
+      RouteIQ is an adaptive AI routing engine that learns which payment partner wins for every transaction — by country, method, amount, and time. It gets smarter with every payment.
+    </p>
+
+    <div class="hero-actions">
+      <a href="https://routeiq.streamlit.app/" target="_blank" class="btn-primary">Launch Live Demo →</a>
+      <a href="mailto:demo@routeiq.ai" class="btn-secondary">Request Free Pilot</a>
+      <a href="https://tryrouteiq.netlify.app/#how" class="btn-secondary">See how it works</a>
+    </div>
+  </div>
+
+  <!-- Live Terminal -->
+  <div class="hero-terminal">
+    <div class="terminal-header">
+      <div class="terminal-dot" style="background:#EF4444"></div>
+      <div class="terminal-dot" style="background:#F59E0B"></div>
+      <div class="terminal-dot" style="background:#10B981"></div>
+      <span style="font-size:12px;color:var(--muted);margin-left:8px;">routing_engine.py</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-row">
+        <span class="t-label">txn_id</span>
+        <span class="t-value">txn_84291</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">country</span>
+        <span class="t-value">Nigeria</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">method</span>
+        <span class="t-value">BANK_TRANSFER</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">amount</span>
+        <span class="t-value">$1,000.00</span>
+      </div>
+      <hr class="t-divider">
+      <div class="t-row">
+        <span class="t-label">PSPs evaluated</span>
+        <span class="t-value">6</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">Fincra score</span>
+        <span class="t-gold">0.752 ← winner</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">Korapay score</span>
+        <span class="t-value">0.681</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">Relworx score</span>
+        <span class="t-value">0.644</span>
+      </div>
+      <hr class="t-divider">
+      <div class="t-row">
+        <span class="t-label">decision</span>
+        <span class="t-green">✓ Fincra · OPTIMAL</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">outcome</span>
+        <span class="t-green">✓ SUCCESS · 687ms</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">profit</span>
+        <span class="t-gold">+$12.64</span>
+      </div>
+      <div class="t-row">
+        <span class="t-label">bandit updated</span>
+        <span class="t-green">✓ learning</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-item fade-up">
+    <span class="stat-number" data-target="86.92">86.9</span><span class="stat-number" style="font-size:28px">%</span>
+    <div class="stat-label">Optimal Selection Rate</div>
+  </div>
+  <div class="stat-item fade-up" style="animation-delay:0.1s">
+    <span class="stat-number" data-target="94.6">94.6</span><span class="stat-number" style="font-size:28px">%</span>
+    <div class="stat-label">Profit Margin</div>
+  </div>
+  <div class="stat-item fade-up" style="animation-delay:0.2s">
+    <span class="stat-number">14</span>
+    <div class="stat-label">Markets Covered</div>
+  </div>
+  <div class="stat-item fade-up" style="animation-delay:0.3s">
+    <span class="stat-number">47</span>
+    <div class="stat-label">PSP Integrations</div>
+  </div>
+</div>
+
+<!-- PROBLEM -->
+<section class="problem" id="problem">
+  <div class="problem-grid">
+    <div>
+      <div class="section-tag">The Problem</div>
+      <h2>Payment failures are a <span style="color:var(--red)">silent revenue killer</span></h2>
+      <p class="section-sub">Most fintechs route payments the same way they did 5 years ago — static rules, manual overrides, and gut instinct. Meanwhile, millions in revenue leak out every month.</p>
+    </div>
+    <div class="problem-stats">
+      <div class="problem-stat">
+        <div class="big-num">15–30%</div>
+        <p>of payments fail due to wrong PSP selection across emerging markets</p>
+      </div>
+      <div class="problem-stat">
+        <div class="big-num">$2.1M</div>
+        <p>average monthly revenue lost by a mid-size fintech processing $50M/month at 68% success rate</p>
+      </div>
+      <div class="problem-stat">
+        <div class="big-num">72hrs</div>
+        <p>average time to detect a PSP degradation using manual monitoring — RouteIQ detects it in &lt;20 transactions</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-tag">How It Works</div>
+  <h2>Route. Learn. <span style="color:var(--gold)">Improve.</span></h2>
+  <p class="section-sub">RouteIQ operates as a closed-loop intelligence system. Every transaction makes it smarter.</p>
+
+  <div class="steps">
+    <div class="step fade-up">
+      <div class="step-num">01</div>
+      <div class="step-icon">⚡</div>
+      <h3>Instant Decision</h3>
+      <p>Payment arrives. RouteIQ evaluates all available PSPs in &lt;100ms using hierarchical bandit scores, economic reward modeling, and Q-Learning state.</p>
+    </div>
+    <div class="step fade-up" style="animation-delay:0.1s">
+      <div class="step-num">02</div>
+      <div class="step-icon">🔁</div>
+      <h3>RL-Powered Retry</h3>
+      <p>If the first PSP fails, reinforcement learning takes over. It has learned from thousands of failure sequences which PSP to try next based on failure type and country. 83.8% of failed payments get recovered.</p>
+    </div>
+    <div class="step fade-up" style="animation-delay:0.2s">
+      <div class="step-num">03</div>
+      <div class="step-icon">🧠</div>
+      <h3>Continuous Learning</h3>
+      <p>Every outcome — success or failure — immediately updates 3 levels of intelligence: local (country), regional (Africa/APAC/EU), and global. Knowledge transfers across markets instantly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTELLIGENCE LAYERS -->
+<section class="layers-section" id="intelligence">
+  <div class="section-tag">Intelligence Architecture</div>
+  <h2>Two layers of <span style="color:var(--gold)">adaptive intelligence</span></h2>
+  <p class="section-sub">Bandits for selection. Reinforcement learning for recovery. Each layer solving a different problem.</p>
+
+  <div class="layers-grid" style="margin-top:60px">
+    <div class="layer-card fade-up">
+      <div class="layer-header">
+        <div class="layer-icon">🏗️</div>
+        <h3>Hierarchical Bandits</h3>
+      </div>
+      <p>Learns simultaneously at local (country + method), regional (Africa/APAC/EU/Americas), and global levels. When Nigeria learns Fincra is best, Kenya benefits immediately. Solves cold-start for new markets.</p>
+    </div>
+    <div class="layer-card fade-up" style="animation-delay:0.1s">
+      <div class="layer-header">
+        <div class="layer-icon">🎯</div>
+        <h3>Thompson Sampling + UCB</h3>
+      </div>
+      <p>Combines probabilistic exploration (Thompson Sampling) with mathematically optimal exploration bonuses (Upper Confidence Bound). PSPs that haven't been tested enough get automatically explored.</p>
+    </div>
+    <div class="layer-card fade-up" style="animation-delay:0.2s">
+      <div class="layer-header">
+        <div class="layer-icon">♟️</div>
+        <h3>Q-Learning (RL)</h3>
+      </div>
+      <p>Reinforcement learning layer that optimizes long-term reward sequences, not just immediate outcomes. RouteIQ thinks ahead — keeping backup PSPs warm so they're ready when the primary fails.</p>
+    </div>
+    <div class="layer-card fade-up" style="animation-delay:0.3s">
+      <div class="layer-header">
+        <div class="layer-icon">💰</div>
+        <h3>Economic Reward Optimization</h3>
+      </div>
+      <p>Optimizes profit, not just success rate. Every decision weighs revenue, PSP cost, latency penalty, and failure cost simultaneously. Routes to maximize margin, not just approvals.</p>
+    </div>
+    <div class="layer-card fade-up" style="animation-delay:0.4s">
+      <div class="layer-header">
+        <div class="layer-icon">🛡️</div>
+        <h3>Circuit Breaker</h3>
+      </div>
+      <p>Automatically disables PSPs when failure rate exceeds 85% over last 20 transactions. Self-heals when PSP recovers. Zero human intervention required. Protects revenue 24/7.</p>
+    </div>
+    <div class="layer-card fade-up" style="animation-delay:0.5s">
+      <div class="layer-header">
+        <div class="layer-icon">📡</div>
+        <h3>Drift Detection</h3>
+      </div>
+      <p>Detects gradual PSP degradation before it becomes catastrophic. Alerts within 20 transactions when a PSP drops 20%+ below baseline. Early warning system for ops teams.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="section-tag">Proven Results</div>
+  <h2>Numbers that matter to <span style="color:var(--gold)">your CFO</span></h2>
+  <p class="section-sub">Measured across 20,000 simulated transactions with real PSP performance profiles across 14 markets.</p>
+
+  <div class="results-grid">
+    <div class="result-card fade-up">
+      <span class="metric">86.92%</span>
+      <div class="metric-label">Optimal Selection Rate</div>
+      <div class="metric-desc">System picks the best PSP 87 in 100 times. Improves to 90%+ after 10,000 transactions.</div>
+    </div>
+    <div class="result-card fade-up" style="animation-delay:0.1s">
+      <span class="metric">+7.88%</span>
+      <div class="metric-label">OSR Improvement Early→Late</div>
+      <div class="metric-desc">Proven learning curve. System measurably improves as it processes more transactions.</div>
+    </div>
+    <div class="result-card fade-up" style="animation-delay:0.2s">
+      <span class="metric">94.6%</span>
+      <div class="metric-label">Profit Margin on Routed Volume</div>
+      <div class="metric-desc">$685K net after PSP fees on $724K GMV routed across 20,000 transactions. Economics-first routing.</div>
+    </div>
+    <div class="result-card fade-up" style="animation-delay:0.3s">
+      <span class="metric">&lt;20</span>
+      <div class="metric-label">Transactions to Detect PSP Failure</div>
+      <div class="metric-desc">Circuit breaker fires within 20 transactions. Average manual detection: 72 hours.</div>
+    </div>
+    <div class="result-card fade-up" style="animation-delay:0.4s">
+      <span class="metric">83.8%</span>
+      <div class="metric-label">RL Retry Recovery Rate</div>
+      <div class="metric-desc">Reinforcement learning recovers 83.8% of failed payments. 4,918 transactions saved across 20,000 simulated.</div>
+    </div>
+    <div class="result-card fade-up" style="animation-delay:0.5s">
+      <span class="metric">0.003</span>
+      <div class="metric-label">Average Regret Score</div>
+      <div class="metric-desc">Near-zero regret means the system consistently picks the economically optimal PSP.</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKETS -->
+<section class="markets-section" id="markets">
+  <div class="section-tag">Geographic Coverage</div>
+  <h2>Built for <span style="color:var(--gold)">emerging markets</span></h2>
+  <p class="section-sub">RouteIQ is designed for the complexity of cross-border payments across Africa, APAC, Europe, and the Americas.</p>
+
+  <div class="markets-grid">
+    <div class="market-card fade-up">
+      <div class="market-region">Africa · 30% of traffic</div>
+      <div class="market-osr" style="color:var(--green)">95.8%</div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:8px;">OSR</div>
+      <div class="market-countries">Nigeria · Kenya · Ghana · Tanzania<br><br>PSPs: Fincra, Korapay, Quidax, Dusupay, Relworx, Payaza</div>
+    </div>
+    <div class="market-card fade-up" style="animation-delay:0.1s">
+      <div class="market-region">APAC · 39% of traffic</div>
+      <div class="market-osr" style="color:var(--gold)">81.3%</div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:8px;">OSR</div>
+      <div class="market-countries">Indonesia · Philippines · Vietnam · Thailand · Malaysia<br><br>PSPs: Xendit, LianLian Pay, Coins.ph, Paymongo, BitcoinVN</div>
+    </div>
+    <div class="market-card fade-up" style="animation-delay:0.2s">
+      <div class="market-region">Europe · 19% of traffic</div>
+      <div class="market-osr" style="color:var(--gold)">83.0%</div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:8px;">OSR</div>
+      <div class="market-countries">European Union<br><br>PSPs: Checkout.com, OpenPayd, ClearJunction, PaySafe</div>
+    </div>
+    <div class="market-card fade-up" style="animation-delay:0.3s">
+      <div class="market-region">Americas · 12% of traffic</div>
+      <div class="market-osr" style="color:var(--green)">91.9%</div>
+      <div style="font-size:11px;color:var(--gold);margin-bottom:8px;">OSR</div>
+      <div class="market-countries">Brazil · Mexico · Chile · USA<br><br>PSPs: Bitso, Checkout.com, ClearJunction</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-glow"></div>
+  <div style="position:relative;z-index:1">
+    <div class="section-tag" style="text-align:center">Get Started</div>
+    <h2>See RouteIQ on<br><span style="color:var(--gold)">your data.</span></h2>
+    <p>Send us 30 days of historical transaction data. We'll simulate RouteIQ and show you exactly how much additional revenue you would have generated. Free. No commitment.</p>
+    <div class="cta-actions">
+      <a href="https://routeiq.streamlit.app/" target="_blank" class="btn-primary">Launch Live Demo →</a>
+      <a href="mailto:demo@routeiq.ai" class="btn-secondary">Request Free Pilot</a>
+    </div>
+    <div style="margin-top:32px;font-size:12px;color:var(--muted)">
+      Typical analysis delivered in 48 hours · No integration required · Zero risk
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">Route<span style="color:var(--gold)">IQ</span></div>
+  <div>AI-powered payment routing for emerging markets</div>
+  <div>© 2026 RouteIQ</div>
+</footer>
+
+<script data-cfasync="false" src="./Index_files/email-decode.min.js"></script><script>
+  // Intersection Observer for fade-up animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Counter animation
+  function animateCounter(el, target, decimals = 0) {
+    const duration = 2000;
+    const start = performance.now();
+    const startVal = 0;
+
+    function update(currentTime) {
+      const elapsed = currentTime - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = startVal + (target - startVal) * eased;
+
+      el.textContent = decimals > 0 ? current.toFixed(decimals) : Math.round(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  // Run counters immediately on page load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.counter').forEach(counter => {
+      const target = parseFloat(counter.dataset.target);
+      const decimals = target % 1 !== 0 ? 1 : 0;
+      animateCounter(counter, target, decimals);
+    });
+  });
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Terminal typing effect
+  const terminalRows = document.querySelectorAll('.t-row');
+  terminalRows.forEach((row, i) => {
+</script><veepn-lock-screen><template shadowrootmode="open"><style>html{box-sizing:border-box;text-size-adjust:100%;word-break:normal;tab-size:4}*,:before,:after{background-repeat:no-repeat;box-sizing:border-box}:before,:after{text-decoration:inherit;vertical-align:inherit}*{padding:0;margin:0}hr{overflow:visible;height:0;color:inherit;border:0;border-top:1px solid}details,main{display:block}summary{display:list-item}small{font-size:80%}[hidden]{display:none!important}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}a{background-color:transparent}a:active,a:hover{outline-width:0}code,kbd,pre,samp{font-family:monospace}pre{font-size:1em}b,strong{font-weight:bolder}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{border-color:inherit;text-indent:0}iframe{border-style:none}input{border-radius:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{appearance:none}textarea{overflow:auto;resize:vertical}button,input,optgroup,select,textarea{font:inherit;color:inherit}optgroup{font-weight:700}button{overflow:visible}button,select{text-transform:none}button,[type=button],[type=reset],[type=submit],[role=button]{cursor:pointer}button::-moz-focus-inner,[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner{border-style:none;padding:0}button,html [type=button],[type=reset],[type=submit]{appearance:auto}button,input,select,textarea{background-color:transparent;border-style:none}button:-moz-focusring,[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner{outline:1px dotted ButtonText}select{appearance:none}a:focus,button:focus,input:focus,select:focus,textarea:focus{outline-width:0}select::-ms-expand{display:none}select::-ms-value{color:currentcolor}legend{border:0;color:inherit;display:table;white-space:normal;max-width:100%}::-webkit-file-upload-button{appearance:auto;color:inherit;font:inherit}[disabled]{cursor:default}img{border-style:none}progress{vertical-align:baseline}[aria-busy=true]{cursor:progress}[aria-controls]{cursor:pointer}[aria-disabled=true]{cursor:default}ul,ol{list-style-type:none}figure{margin:0}@keyframes slide-in{0%{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}.gradient-blue{background:radial-gradient(106.41% 128.47% at 50.15% 128.47%,#23abff,#3066ff)}.gradient-green{background:radial-gradient(92.26% 118.88% at 50.15% .13%,#00c3c3,#00aab3)}.gradient-purple{background:radial-gradient(165.12% 115.56% at 50.15% .13%,#a15aff,#00a0eb)}.bg-blue{background-color:#f2f5ff}.bg-purple{background-color:#f7f0ff}.bg-green{background-color:#ebffed}.lock-screen{font-family:FigtreeVF,sans-serif;letter-spacing:normal;position:fixed;z-index:2147483638;right:24px;bottom:24px;width:327px;border-radius:24px;overflow:hidden;box-shadow:0 24px 32px #00000014;animation:slide-in .3s ease-in-out forwards}.lock-screen__content{position:relative;padding:24px 24px 64px}.lock-screen__close{position:absolute;top:16px;right:16px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;opacity:.5}.lock-screen__label{height:26px;width:fit-content;border-radius:50px;background-color:#fff3;padding-inline:16px;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-size:12px;line-height:18px;margin:-8px auto 16px}.lock-screen__title{color:#fff;text-align:center;font-size:20px;line-height:28px;font-weight:600;margin-bottom:8px}.lock-screen__description{color:#f5f6f7;text-align:center;font-size:14px;line-height:20px}.lock-screen__description b{font-weight:600}.lock-screen__card{position:relative;z-index:1;margin-top:-44px;background-color:#fff;border-radius:24px;padding:32px 20px 20px}.lock-screen__inner{margin-bottom:24px}.lock-screen__submit{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:16px;height:40px;width:100%;border-radius:12px;padding-inline:16px;background-color:#f70;color:#fff;margin-bottom:16px}.lock-screen__skip{display:flex;align-items:center;justify-content:center;font-size:14px;line-height:20px;color:#82829c;margin-inline:auto}.price-card{border:1px solid #f2f2fc;background:linear-gradient(254.14deg,#fafbff .04%,#f5f8ff 100.04%);border-radius:24px;padding:24px 28px}.price-card__label{color:#4a5764;text-align:center;font-size:14px;line-height:20px;text-transform:uppercase;margin-bottom:16px}.price-card__price{display:flex;justify-content:center;align-items:flex-start;column-gap:2px;margin-bottom:12px}.price-card__currency{color:#515478;font-size:18px;line-height:28px}.price-card__number{color:#14142a;text-align:center;font-size:64px;line-height:54px}.price-card__wrap{display:flex;flex-direction:column}.price-card__decimal{color:#515478;font-size:18px;line-height:28px;font-weight:600}.price-card__period{color:#515478;font-size:14px;line-height:20px;margin-top:-6px}.price-card__discount{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:12px}.price-card__discount-divider{position:absolute;z-index:0;top:50%;left:0;width:100%;height:1px;background-color:#dbe2f9;transform:translateY(-50%)}.price-card__discount-icon{position:absolute;z-index:1;top:50%;left:50%;transform:translate(-50%,-50%)}.price-card__discount-text{position:relative;z-index:2;color:#fff;font-size:12px;font-weight:600;line-height:18px}.price-card__features{display:flex;align-items:center;justify-content:center;column-gap:16px}.price-card__feature{color:#222e3a;font-size:14px;line-height:20px;display:flex;align-items:center;gap:6px}.price-card__feature:before{content:"";display:block;width:4px;height:4px;background-color:#20df9e;border-radius:50%;flex-shrink:0}.features-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.features-list__item{display:flex;flex-direction:column;align-items:center;gap:6px}.features-list__icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center}.features-list__text{color:#293a53;text-align:center;font-size:16px;line-height:24px;letter-spacing:-.1px}</style></template><style>@font-face{font-family:FigtreeVF;src:url(chrome-extension://majdfhpaihoncoakbjgbdhglocklcgno/fonts/FigtreeVF.woff2) format("woff2 supports variations"),url(chrome-extension://majdfhpaihoncoakbjgbdhglocklcgno/fonts/FigtreeVF.woff2) format("woff2-variations");font-weight:100 1000;font-display:swap}</style></veepn-lock-screen></body></html>
