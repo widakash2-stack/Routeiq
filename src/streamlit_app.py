@@ -452,9 +452,9 @@ if os.path.exists(DECISION_LOG_PATH):
     total_revenue = _dl_profit["_revenue_txn"].sum()
     total_cost    = _dl_profit["_cost_txn"].sum()
     net_profit    = total_revenue - total_cost
-    profit_margin = (net_profit / total_revenue * 100) if total_revenue > 0 else 0.0
-    margin_color  = "#16A34A" if net_profit >= 0 else "#DC2626"
-    margin_sign   = "+" if net_profit >= 0 else ""
+    margin_color   = "#16A34A" if net_profit >= 0 else "#DC2626"
+    margin_sign    = "+" if net_profit >= 0 else ""
+    fees_saved     = (len(_dl_profit) * 2.50) - total_cost
 
     # ── 4 KPI cards ──────────────────────────────────────────────────────
     st.markdown(f"""
@@ -469,17 +469,17 @@ if os.path.exists(DECISION_LOG_PATH):
         <div class="kpi-value kpi-value-purple">${total_cost:,.2f}</div>
         <div style="font-size:11px;color:#94A3B8;margin-top:3px;">base cost per transaction</div>
       </div>
+      <div class="kpi-card kpi-card-green" style="flex:1;">
+        <div class="kpi-label">PSP Fees Saved</div>
+        <div class="kpi-value kpi-value-green">${fees_saved:,.2f}</div>
+        <div style="font-size:11px;color:#94A3B8;margin-top:3px;">vs always using premium PSPs</div>
+      </div>
       <div class="kpi-card" style="flex:1; border-left:4px solid {margin_color};">
         <div class="kpi-label">Net After PSP Fees</div>
         <div style="font-size:22px;font-weight:700;color:{margin_color};margin-top:4px;letter-spacing:-0.5px;">
           {margin_sign}${abs(net_profit):,.2f}
         </div>
         <div style="font-size:11px;color:#94A3B8;margin-top:3px;">revenue − PSP cost</div>
-      </div>
-      <div class="kpi-card kpi-card-green" style="flex:1;">
-        <div class="kpi-label">Profit Margin</div>
-        <div class="kpi-value kpi-value-green">{margin_sign}{profit_margin:.1f}%</div>
-        <div style="font-size:11px;color:#94A3B8;margin-top:3px;">net / revenue</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
