@@ -462,7 +462,7 @@ if os.path.exists(DECISION_LOG_PATH):
       <div class="kpi-card kpi-card-blue" style="flex:1;">
         <div class="kpi-label">GMV Routed</div>
         <div class="kpi-value kpi-value-blue">${total_revenue:,.2f}</div>
-        <div style="font-size:11px;color:#94A3B8;margin-top:3px;">from successful txns × 1.5%</div>
+        <div style="font-size:11px;color:#94A3B8;margin-top:3px;">total value of successfully routed payments</div>
       </div>
       <div class="kpi-card kpi-card-purple" style="flex:1;">
         <div class="kpi-label">Total PSP Cost</div>
