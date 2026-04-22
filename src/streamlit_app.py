@@ -515,9 +515,10 @@ if os.path.exists(DECISION_LOG_PATH):
     ri_left, ri_right = st.columns([1.8, 1])
 
     with ri_left:
-        # Cumulative profit line chart using reward column
-        _dl_profit["_cumulative"] = _dl_profit["_reward"].cumsum()
-        _dl_profit["_txn_num"]    = range(1, len(_dl_profit) + 1)
+        # Cumulative PSP fees saved chart: per-txn savings = 2.50 - actual_psp_cost
+        _dl_profit["_fees_saved_txn"] = 2.50 - _dl_profit["_cost_txn"]
+        _dl_profit["_cumulative"]     = _dl_profit["_fees_saved_txn"].cumsum()
+        _dl_profit["_txn_num"]        = range(1, len(_dl_profit) + 1)
 
         # Single colour based on final value
         final_val   = _dl_profit["_cumulative"].iloc[-1]
@@ -528,13 +529,13 @@ if os.path.exists(DECISION_LOG_PATH):
             .mark_line(strokeWidth=2, color=line_color)
             .encode(
                 x=alt.X("_txn_num:Q", title="Transaction Number"),
-                y=alt.Y("_cumulative:Q", title="Cumulative Net Profit ($)"),
+                y=alt.Y("_cumulative:Q", title="Cumulative Fees Saved ($)"),
                 tooltip=[
                     alt.Tooltip("_txn_num:Q", title="Transaction"),
-                    alt.Tooltip("_cumulative:Q", title="Cumulative Profit ($)", format="$,.2f"),
+                    alt.Tooltip("_cumulative:Q", title="Cumulative Fees Saved ($)", format="$,.2f"),
                 ],
             )
-            .properties(title="Cumulative Profit Over Transactions", height=260)
+            .properties(title="Cumulative PSP Fees Saved Over Transactions", height=260)
             .configure_view(strokeWidth=0)
             .configure_axis(grid=True, gridColor="#F1F5F9", labelColor="#64748B", titleColor="#64748B")
             .configure_title(fontSize=13, fontWeight=600, color="#0F172A")
@@ -542,7 +543,7 @@ if os.path.exists(DECISION_LOG_PATH):
         st.altair_chart(cum_chart, use_container_width=True)
 
     with ri_right:
-        # Avg profit per transaction by region
+        # Avg PSP fees saved per transaction by region
         _psp_primary_country2 = psp_df.groupby("psp")["country"].first().to_dict()
         _dl_profit["_region"] = (
             _dl_profit["selected_psp"]
@@ -551,9 +552,9 @@ if os.path.exists(DECISION_LOG_PATH):
             .fillna("Other")
         )
         region_profit = (
-            _dl_profit.groupby("_region")["_reward"].mean()
+            _dl_profit.groupby("_region")["_fees_saved_txn"].mean()
             .reset_index()
-            .rename(columns={"_region": "Region", "_reward": "Avg Profit"})
+            .rename(columns={"_region": "Region", "_fees_saved_txn": "Avg Fees Saved"})
         )
         region_profit = region_profit[region_profit["Region"] != "Other"]
 
@@ -568,17 +569,17 @@ if os.path.exists(DECISION_LOG_PATH):
             .mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
             .encode(
                 x=alt.X("Region:N", title=None, axis=alt.Axis(labelAngle=0)),
-                y=alt.Y("Avg Profit:Q", title="Avg Profit / Txn ($)"),
+                y=alt.Y("Avg Fees Saved:Q", title="Avg Fees Saved / Txn ($)"),
                 color=alt.Color("Region:N", scale=alt.Scale(
                     domain=list(region_colors_map.keys()),
                     range=list(region_colors_map.values()),
                 ), legend=None),
                 tooltip=[
                     alt.Tooltip("Region:N"),
-                    alt.Tooltip("Avg Profit:Q", title="Avg Profit ($)", format="$,.4f"),
+                    alt.Tooltip("Avg Fees Saved:Q", title="Avg Fees Saved ($)", format="$,.4f"),
                 ],
             )
-            .properties(title="Avg Profit by Region", height=260)
+            .properties(title="Avg PSP Fees Saved by Region", height=260)
             .configure_view(strokeWidth=0)
             .configure_axis(grid=False, labelColor="#64748B", titleColor="#64748B")
             .configure_title(fontSize=13, fontWeight=600, color="#0F172A")
@@ -984,8 +985,9 @@ with wif_col2:
     cost_mult = st.slider("Cost Multiplier", 0.5, 2.0, 1.0, 0.1, key="cost_mult")
 
 with wif_col3:
-    st.markdown("**Transaction Amount**")
+    st.markdown("**Transaction Amount** — affects cost constraint (amounts under $100 skip high-cost PSPs) and revenue calculation")
     wif_amount = st.slider("Amount ($)", 100, 10000, 1000, 100, key="sim_amount")
+    st.caption("Higher amounts unlock more PSP options. Revenue = amount × 1.5%")
 
 run_sim = st.button("Run Simulation", type="primary")
 
@@ -1129,6 +1131,7 @@ st.divider()
 # PSP HEALTH MONITOR
 # ═══════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">PSP Health Monitor</div>', unsafe_allow_html=True)
+st.markdown('<div class="ab-subtitle">Real-time PSP performance vs historical baseline — circuit breaker fires automatically at 85% failure rate</div>', unsafe_allow_html=True)
 
 if os.path.exists(DECISION_LOG_PATH):
     dl_health = load_decision_log()
@@ -1193,6 +1196,7 @@ if os.path.exists(DECISION_LOG_PATH):
             use_container_width=True,
             height=min(400, 40 + len(health_df) * 35),
         )
+        st.caption("All PSPs currently performing above baseline. In production, degrading PSPs appear in red with automatic circuit breaker activation within 20 transactions.")
     else:
         st.info("Not enough transaction data yet — run more simulations.")
 else:
@@ -1260,6 +1264,7 @@ st.divider()
 # PSP INTELLIGENCE TABLE
 # ═══════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">PSP Intelligence</div>', unsafe_allow_html=True)
+st.caption("OSR % = Optimal Selection Rate. Green 100% means RouteIQ always picked this PSP when it was the best option. Red 0% means a better PSP was always available in this market — the PSP is not broken, just never the top scorer.")
 
 psp_perf = df.groupby("chosen_psp").agg(
     volume=("txn_id",    "count"),
@@ -1461,6 +1466,7 @@ st.markdown('<div class="section-title">Transaction Explorer</div>', unsafe_allo
 left, right = st.columns([2.5, 1])
 
 with left:
+    st.caption("Suboptimal decisions are not errors — they are intentional exploration or constraint-driven. The system learns from every outcome including suboptimal ones.")
     drop_cols = ["psp_ranking"]
     explorer_df = df.drop(columns=drop_cols, errors="ignore").sort_values("regret", ascending=False).reset_index(drop=True)
 
@@ -1493,11 +1499,14 @@ with right:
     row    = df[df["txn_id"].astype(str) == txn_id].iloc[0]
 
     if row["is_optimal"] == 1:
-        status_badge = '<span class="badge-optimal">Optimal</span>'
+        status_badge  = '<span class="badge-optimal">Optimal</span>'
+        decision_reason = '<div style="margin-top:10px;font-size:12px;color:#16A34A;">✓ System selected the statistically best PSP for this transaction</div>'
     elif row["regret"] < 0.02:
-        status_badge = '<span class="badge-explore">Near Optimal</span>'
+        status_badge  = '<span class="badge-explore">Near Optimal</span>'
+        decision_reason = '<div style="margin-top:10px;font-size:12px;color:#0066FF;">~ Score difference was minimal. System picked a near-equivalent PSP — regret is low</div>'
     else:
-        status_badge = '<span style="background:#FEE2E2;color:#DC2626;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">Suboptimal</span>'
+        status_badge  = '<span style="background:#FEE2E2;color:#DC2626;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">Suboptimal</span>'
+        decision_reason = '<div style="margin-top:10px;font-size:12px;color:#F97316;">⚠ One of three causes: (1) Exploration — Thompson Sampling deliberately tested a lower-ranked PSP to gather data, (2) Minimum share floor — an underused PSP received a score boost, or (3) Circuit breaker — the optimal PSP was temporarily disabled</div>'
 
     st.markdown(f"""
     <div class="card">
@@ -1511,6 +1520,7 @@ with right:
       <div class="decision-value" style="margin-bottom:12px;">{round(row['regret'], 4)}</div>
       <div class="decision-label">Status</div>
       <div style="margin-top:4px;">{status_badge}</div>
+      {decision_reason}
     </div>
     """, unsafe_allow_html=True)
 
