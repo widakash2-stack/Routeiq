@@ -110,7 +110,7 @@ _combo_psps = (
 )
 
 CONTEXTS = [
-    (row["country"], row["payment_method"], row["psp"], 1.0)
+    (row["country"], row["payment_method"].upper().replace(" ", "_"), row["psp"], 1.0)
     for _, row in _combo_psps.iterrows()
 ]
 
