@@ -1330,7 +1330,7 @@ for country, region in _country_region.items():
 _psp_primary_country = psp_df.groupby("psp")["country"].first().to_dict()
 
 geo_df = df.copy()
-geo_df["region"] = geo_df["chosen_psp"].map(_psp_primary_country).map(_country_region)
+geo_df["region"] = geo_df["chosen_psp"].apply(_get_region)
 
 # Also pull avg reward if available
 has_reward = "reward" not in df.columns  # replay_results doesn't have reward; load from decision_log
