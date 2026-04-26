@@ -24,20 +24,43 @@ MAX_COST = 3.0
 # =========================
 
 REGION_MAP = {
-    "Nigeria":     "Africa",
-    "Kenya":       "Africa",
-    "Ghana":       "Africa",
-    "Tanzania":    "Africa",
-    "Indonesia":   "APAC",
-    "Philippines": "APAC",
-    "Vietnam":     "APAC",
-    "Thailand":    "APAC",
-    "Malaysia":    "APAC",
-    "EU":          "Europe",
-    "Brazil":      "Americas",
-    "Mexico":      "Americas",
-    "Chile":       "Americas",
-    "USA":         "Americas",
+    # Africa
+    "NGN":    "Africa",
+    "KES":    "Africa",
+    "GHS":    "Africa",
+    "TZS":    "Africa",
+    "UGX":    "Africa",
+    "ZAR":    "Africa",
+    "ZMW":    "Africa",
+    "XAF":    "Africa",
+    "XOF":    "Africa",
+    "EGP":    "Africa",
+    # APAC
+    "IDR":    "APAC",
+    "PHP":    "APAC",
+    "THB":    "APAC",
+    "VND":    "APAC",
+    "MYR":    "APAC",
+    "BDT":    "APAC",
+    "JPY":    "APAC",
+    "AUD":    "APAC",
+    "CNY":    "APAC",
+    # Europe
+    "EUR":    "Europe",
+    "PLN":    "Europe",
+    "GBP":    "Europe",
+    # LATAM
+    "BRL":    "LATAM",
+    "MXN":    "LATAM",
+    "COP":    "LATAM",
+    "ARS":    "LATAM",
+    "CLP":    "LATAM",
+    "PEN":    "LATAM",
+    # North America
+    "CAD":    "North America",
+    "USD":    "North America",
+    # Global
+    "GLOBAL": "Global",
 }
 
 

@@ -6,68 +6,57 @@ OUTPUT_PATH = os.path.join(
     "../data/payment_data.csv"
 )
 
-# Fixed success rates per PSP
+# =========================
+# SUCCESS RATES
+# Premium: 0.75-0.85 | Good: 0.65-0.75 | Standard: 0.55-0.65
+# =========================
 SUCCESS_RATES = {
-    # Africa — clear 2-tier gap for faster bandit convergence
-    "Relworx":       0.65,
-    "Fincra":        0.75,
-    "Korapay":       0.60,
-    "Dusupay":       0.55,
-    "Payaza":        0.50,
-    "Quidax":        0.45,
-    "Partner_S":     0.45,
-    "Partner_T":     0.45,
-    "Partner_U":     0.45,
-    # APAC
-    "Xendit":        0.75,
-    "Partner_A":     0.75,
-    "LianLian_Pay":  0.67,
-    "Coins.ph":      0.67,
-    "Partner_B":     0.67,
-    "Paymongo":      0.60,
-    "Partner_C":     0.60,
-    "Partner_D":     0.60,
-    "BitcoinVN":     0.55,
-    "Partner_E":     0.55,
-    "Partner_F":     0.55,
-    "Directa24":     0.45,
-    "Partner_G":     0.45,
-    "Partner_H":     0.45,
-    "Partner_I":     0.45,
-    "Partner_J":     0.45,
-    # Europe / Americas
-    "Checkout.com":  0.75,
-    "Partner_K":     0.75,
-    "OpenPayd":      0.67,
-    "ClearJunction": 0.67,
-    "Partner_L":     0.67,
-    "Bitso":         0.60,
-    "Partner_M":     0.60,
-    "Partner_N":     0.60,
-    "PaySafe":       0.55,
-    "Partner_O":     0.55,
-    "Partner_P":     0.55,
-    "Partner_Q":     0.45,
-    "Partner_R":     0.45,
-    "Partner_T":     0.67,
-    "Partner_U":     0.69,
-    "Partner_V":     0.72,
-    "Partner_W":     0.45,
-    "Partner_X":     0.75,
-    "Partner_Y":     0.60,
-    "Partner_Z":     0.55,
-    "Partner_AA":    0.67,
-    "Partner_AB":    0.45,
-    "Partner_AC":    0.60,
-    "Partner_AD":    0.67,
+    # Premium
+    "Xendit":        0.82,
+    "Fincra":        0.80,
+    "checkout":      0.80,
+    "korapay":       0.78,
+    "Passpoint":     0.76,
+    # Good
+    "payok":         0.74,
+    "paymongo":      0.72,
+    "relworx":       0.72,
+    "yellowcard":    0.70,
+    "directa24":     0.70,
+    "bitso":         0.68,
+    "openpayd":      0.68,
+    "clearjunction": 0.67,
+    "tazapay":       0.67,
+    "Alfred":        0.66,
+    # Standard
+    "1vnpay":        0.64,
+    "altpay":        0.63,
+    "awepay":        0.62,
+    "Bitlipa":       0.62,
+    "brick":         0.62,
+    "cobre":         0.61,
+    "Innovative":    0.61,
+    "apaylo":        0.60,
+    "wingpay":       0.60,
+    "M2pay":         0.60,
+    "Vimoni":        0.60,
+    "BRLA":          0.59,
+    "Shimatomo":     0.59,
+    "Banxa":         0.58,
+    "CoinsPH":       0.58,
+    "Sasapay":       0.58,
+    "payaza":        0.57,
+    "Dusupay":       0.57,
+    "Afriex":        0.56,
 }
 
-# Cost and latency tiers
-PREMIUM_PSPS = {"Checkout.com", "Relworx", "Xendit", "Fincra"}
+# =========================
+# TIERS
+# =========================
+PREMIUM_PSPS = {"Xendit", "Fincra", "checkout", "korapay", "Passpoint"}
 GOOD_PSPS    = {
-    "Coins.ph", "BitcoinVN", "Bitso", "OpenPayd", "ClearJunction",
-    "Korapay", "Dusupay", "Payaza", "Quidax", "Paymongo",
-    "LianLian_Pay", "Directa24", "PaySafe",
+    "payok", "paymongo", "relworx", "yellowcard", "directa24",
+    "bitso", "openpayd", "clearjunction", "tazapay", "Alfred",
 }
 
 def _tier(psp):
@@ -75,55 +64,107 @@ def _tier(psp):
         return "premium"
     if psp in GOOD_PSPS:
         return "good"
-    return "budget"
+    return "standard"
 
-COST_MAP    = {"premium": 2.50, "good": 1.80, "budget": 1.20}
-LATENCY_MAP = {"premium": 600,  "good": 1000, "budget": 1600}
+# Cost ranges: premium $2.00-2.50, good $1.50-2.00, standard $1.00-1.50
+COST_MAP = {
+    "premium":  2.25,
+    "good":     1.75,
+    "standard": 1.25,
+}
 
+# Latency: premium 600-800ms, good 800-1200ms, standard 1200-1800ms
+LATENCY_MAP = {
+    "premium":  700,
+    "good":     1000,
+    "standard": 1500,
+}
+
+# =========================
+# COVERAGE
+# (currency, [psps], [payment_methods])
+# Grouped by currency so routing_engine can key on currency/method
+# =========================
 COVERAGE = [
-    ("Indonesia",    ["Xendit", "LianLian_Pay", "Partner_A", "Partner_B", "Partner_C"],
-                     ["GoPay", "OVO", "DANA", "ShopeePay", "BANK_TRANSFER"]),
-    ("Philippines",  ["Coins.ph", "Paymongo", "Partner_D", "Partner_E", "Partner_F"],
-                     ["GCash", "PayMaya", "BANK_TRANSFER"]),
-    ("Vietnam",      ["BitcoinVN", "Partner_G", "Partner_H", "Partner_I", "Partner_J"],
-                     ["MoMo", "ZaloPay", "Viettel_Pay"]),
-    ("Thailand",     ["Directa24", "Partner_K", "Partner_L", "Partner_M", "Partner_N"],
-                     ["PromptPay", "BANK_TRANSFER"]),
-    ("Malaysia",     ["Directa24", "Partner_O", "Partner_P", "Partner_Q", "Partner_R"],
-                     ["FPX", "Touch_n_Go", "BANK_TRANSFER"]),
-    ("Nigeria",      ["Quidax", "Korapay", "Fincra", "Dusupay", "Relworx", "Payaza"],
-                     ["BANK_TRANSFER"]),
-    ("Kenya",        ["Fincra", "Dusupay", "Relworx", "Payaza", "Partner_S"],
-                     ["M-Pesa", "BANK_TRANSFER"]),
-    ("Ghana",        ["Fincra", "Dusupay", "Relworx", "Payaza", "Partner_T"],
-                     ["MTN_Mobile_Money", "BANK_TRANSFER"]),
-    ("Tanzania",     ["Fincra", "Dusupay", "Relworx", "Payaza", "Partner_U"],
-                     ["Airtel_Money", "HaloPesa", "BANK_TRANSFER"]),
-    ("EU",           ["Checkout.com", "OpenPayd", "ClearJunction", "PaySafe", "Partner_V"],
-                     ["SEPA", "OPEN_BANKING"]),
-    ("Brazil",       ["Bitso", "Partner_W", "Partner_X", "Partner_Y", "Partner_Z"],
-                     ["PIX", "BANK_TRANSFER"]),
-    ("Mexico",       ["Bitso", "Partner_W", "Partner_X", "Partner_Y", "Partner_Z"],
-                     ["SPEI", "BANK_TRANSFER"]),
-    ("Chile",        ["Partner_W", "Partner_X", "Partner_Y", "Partner_Z", "Partner_AA"],
-                     ["BANK_TRANSFER"]),
-    ("USA",          ["Checkout.com", "ClearJunction", "Partner_AB", "Partner_AC", "Partner_AD"],
-                     ["ACH", "WIRE"]),
+    # ── APAC ──────────────────────────────────────────────────────────────
+    ("VND",  ["1vnpay", "awepay", "M2pay"],
+             ["Local Wallet", "Bank Transfer", "MoMo", "VietQR"]),
+    ("THB",  ["awepay", "payok", "M2pay"],
+             ["Thai QR", "Bank Transfer"]),
+    ("MYR",  ["awepay", "M2pay"],
+             ["FPX", "DuitNow"]),
+    ("IDR",  ["awepay", "brick", "payok"],
+             ["Bank Transfer", "QRIS", "Ewallet", "Dana", "OVO"]),
+    ("PHP",  ["Xendit", "paymongo", "Innovative", "wingpay", "CoinsPH"],
+             ["ShopeePay", "GrabPay", "GCash", "QRPH", "Bank Transfer", "PayMaya"]),
+    ("JPY",  ["Shimatomo"],
+             ["Bank Transfer"]),
+    ("AUD",  ["Banxa"],
+             ["PayID"]),
+
+    # ── Africa ────────────────────────────────────────────────────────────
+    ("NGN",  ["Fincra", "korapay", "yellowcard", "Passpoint"],
+             ["Bank Transfer"]),
+    ("KES",  ["Fincra", "korapay", "yellowcard", "Sasapay", "Passpoint"],
+             ["M-Pesa", "Mobile Money"]),
+    ("GHS",  ["korapay", "Bitlipa"],
+             ["MTN", "Mobile Money"]),
+    ("TZS",  ["Bitlipa", "relworx", "yellowcard", "payaza", "Dusupay"],
+             ["Bank Transfer", "Mobile Money", "Airtel", "Vodacom M-Pesa"]),
+    ("UGX",  ["Bitlipa", "relworx", "payaza", "Dusupay", "Fincra"],
+             ["MTN", "Airtel", "Mobile Money"]),
+    ("ZAR",  ["Bitlipa"],
+             ["Bank Transfer"]),
+    ("XOF",  ["payaza"],
+             ["Wave"]),
+    ("EGP",  ["Afriex"],
+             ["Bank Transfer"]),
+    ("XAF",  ["Afriex"],
+             ["MTN"]),
+
+    # ── Europe ────────────────────────────────────────────────────────────
+    ("EUR",  ["altpay", "openpayd", "clearjunction"],
+             ["Bank Transfer", "SEPA Bank Transfer"]),
+    ("PLN",  ["Vimoni"],
+             ["BLIK"]),
+
+    # ── LATAM ─────────────────────────────────────────────────────────────
+    ("MXN",  ["bitso", "directa24", "tazapay", "Alfred"],
+             ["SPEI", "CODI", "Bank Transfer"]),
+    ("COP",  ["bitso", "cobre", "directa24", "Alfred"],
+             ["PSE", "Bank Transfer"]),
+    ("BRL",  ["bitso", "directa24", "tazapay", "BRLA", "Alfred"],
+             ["PIX", "PIX QR", "Bank Transfer"]),
+    ("ARS",  ["bitso"],
+             ["Bank Transfer"]),
+    ("CLP",  ["directa24"],
+             ["Bank Transfer"]),
+    ("PEN",  ["directa24"],
+             ["Bank Transfer"]),
+
+    # ── North America ─────────────────────────────────────────────────────
+    ("CAD",  ["apaylo"],
+             ["Interac Bank Transfer"]),
+
+    # ── Global ────────────────────────────────────────────────────────────
+    ("GLOBAL", ["checkout"],
+               ["Card", "Apple Pay", "Google Pay"]),
 ]
 
 
 def generate():
     rows = []
 
-    for country, partners, methods in COVERAGE:
+    for currency, partners, methods in COVERAGE:
         for partner in partners:
             tier = _tier(partner)
+            sr   = SUCCESS_RATES.get(partner, 0.60)
             for method in methods:
                 rows.append({
-                    "country":        country,
+                    "country":        currency,   # keyed by currency throughout the system
                     "payment_method": method,
                     "psp":            partner,
-                    "success_rate":   SUCCESS_RATES[partner],
+                    "success_rate":   sr,
                     "base_cost":      COST_MAP[tier],
                     "percent_cost":   0.015,
                     "latency_ms":     LATENCY_MAP[tier],
@@ -134,7 +175,8 @@ def generate():
     df.to_csv(OUTPUT_PATH, index=False)
 
     print(f"Generated {len(df)} rows → {OUTPUT_PATH}")
-    print(f"Countries: {df['country'].nunique()}  |  Partners: {df['psp'].nunique()}  |  Methods: {df['payment_method'].nunique()}")
+    print(f"Currencies: {df['country'].nunique()}  |  Partners: {df['psp'].nunique()}  |  Methods: {df['payment_method'].nunique()}")
+    return df
 
 
 if __name__ == "__main__":
