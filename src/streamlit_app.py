@@ -342,7 +342,21 @@ def load_psp_data():
 df      = load_replay_results()
 psp_df  = load_psp_data()
 
-# PSP lookup dicts used by the live routing simulator
+# Map country names to currency codes (payment_data.csv uses currency as country key)
+COUNTRY_TO_CURRENCY = {
+    "Nigeria": "NGN", "Kenya": "KES", "Ghana": "GHS", "Tanzania": "TZS",
+    "Uganda": "UGX", "South Africa": "ZAR",
+    "Indonesia": "IDR", "Philippines": "PHP", "Thailand": "THB",
+    "Vietnam": "VND", "Malaysia": "MYR", "Japan": "JPY", "Australia": "AUD",
+    "EU": "EUR", "Poland": "PLN",
+    "Brazil": "BRL", "Mexico": "MXN", "Colombia": "COP", "Argentina": "ARS",
+    "Chile": "CLP", "Peru": "PEN", "USA": "USD",
+}
+
+# Add currency column to psp_df for lookups
+psp_df["currency"] = psp_df["country"]  # country column actually holds currency codes
+psp_df["country_name"] = psp_df["currency"].map({v: k for k, v in COUNTRY_TO_CURRENCY.items()})
+
 _psp_success_rate = psp_df.groupby("psp")["success_rate"].mean().to_dict()
 _psp_base_cost    = psp_df.groupby("psp")["base_cost"].mean().to_dict()
 _psp_base_latency = psp_df.groupby("psp")["latency_ms"].mean().to_dict()
@@ -994,8 +1008,9 @@ run_sim = st.button("Run Simulation", type="primary")
 
 if run_sim:
     # Get PSPs available for the currently selected country + method
+    _selected_currency = COUNTRY_TO_CURRENCY.get(country, country)
     wif_psps_rows = psp_df[
-        (psp_df["country"] == country) & (psp_df["payment_method"] == payment_method)
+        (psp_df["country"] == _selected_currency) & (psp_df["payment_method"] == payment_method)
     ].copy()
 
     if wif_psps_rows.empty:
