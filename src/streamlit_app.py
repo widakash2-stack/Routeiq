@@ -376,12 +376,36 @@ REGION_MAP = {
     "Brazil": "Americas", "Mexico": "Americas", "Chile": "Americas", "USA": "Americas",
 }
 
-_psp_region = (
-    psp_df.assign(region=psp_df["country"].map(REGION_MAP))
-    .groupby("psp")["region"]
-    .first()
-    .to_dict()
-)
+_psp_region = {
+    # Africa
+    "fincra": "Africa", "korapay": "Africa", "passpoint": "Africa",
+    "relworx": "Africa", "yellowcard": "Africa", "payaza": "Africa",
+    "dusupay": "Africa", "bitlipa": "Africa", "sasapay": "Africa",
+    "afriex": "Africa", "linkio": "Africa",
+    # APAC
+    "xendit": "APAC", "payok": "APAC", "paymongo": "APAC",
+    "awepay": "APAC", "m2pay": "APAC", "mobi": "APAC",
+    "1vnpay": "APAC", "shimatomo": "APAC", "banxa": "APAC",
+    "coinsph": "APAC", "ninepay": "APAC", "baokim": "APAC",
+    "rosapay": "APAC", "artismpay": "APAC", "gidi": "APAC",
+    "brick": "APAC", "durianpay": "APAC", "aamarpay": "APAC",
+    "numbers": "APAC", "lianlian": "APAC", "faastpay": "APAC",
+    "stables": "APAC", "cvpay": "APAC",
+    # Europe
+    "clearjunction": "Europe", "openpayd": "Europe", "altpay": "Europe",
+    "ivy": "Europe", "voltio": "Europe", "vimoni": "Europe", "apiworld": "Europe",
+    # Americas
+    "directa24": "Americas", "bitso": "Americas", "koywe": "Americas",
+    "local_payment": "Americas", "tazapay": "Americas", "alfred": "Americas",
+    "brla": "Americas", "cobre": "Americas", "monnet": "Americas", "helloclever": "Americas",
+    # Middle East
+    "fuse uab": "Middle East", "innovative": "Middle East",
+}
+
+def _get_region(psp_name):
+    if pd.isna(psp_name):
+        return "—"
+    return _psp_region.get(str(psp_name).lower().strip(), "—")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HEADER
@@ -442,7 +466,10 @@ if os.path.exists(DECISION_LOG_PATH):
             axis=1,
         )
 
-    _dl_profit["_success"]    = _dl_profit.get("final_outcome", _dl_profit.get("outcome", "failure")).str.lower() == "success"
+    if "final_outcome" in _dl_profit.columns and _dl_profit["final_outcome"].notna().any():
+        _dl_profit["_success"] = _dl_profit["final_outcome"].str.lower() == "success"
+    else:
+        _dl_profit["_success"] = _dl_profit["outcome"].str.lower() == "success"
     _dl_profit["_revenue_txn"] = _dl_profit.apply(
         lambda r: r["amount"] * TAKE_RATE if r["_success"] else 0, axis=1
     )
@@ -544,13 +571,7 @@ if os.path.exists(DECISION_LOG_PATH):
 
     with ri_right:
         # Avg PSP fees saved per transaction by region
-        _psp_primary_country2 = psp_df.groupby("psp")["country"].first().to_dict()
-        _dl_profit["_region"] = (
-            _dl_profit["selected_psp"]
-            .map(_psp_primary_country2)
-            .map(REGION_MAP)
-            .fillna("Other")
-        )
+        _dl_profit["_region"] = _dl_profit["selected_psp"].apply(_get_region).replace("—", "Other")
         region_profit = (
             _dl_profit.groupby("_region")["_fees_saved_txn"].mean()
             .reset_index()
@@ -669,47 +690,27 @@ st.markdown('<div class="section-title">Learning Improvement — Early vs Late</
 st.markdown('<div class="ab-subtitle">Proving the system gets smarter over time</div>', unsafe_allow_html=True)
 
 if os.path.exists(DECISION_LOG_PATH):
-    dl_ab = load_decision_log()
+    # Use replay_results.csv directly — it already has is_optimal and regret computed correctly
+    mid_ab   = len(df) // 2
+    early_df = df.iloc[:mid_ab]
+    late_df  = df.iloc[mid_ab:]
 
-    # Need psp_data for scoring — build same lookups as replay_engine
-    _psp_df_ab = psp_df.copy()
-    _MAX_COST    = 3.0
-    _MAX_LATENCY = 2500
-    _psp_df_ab["cost_score"]    = 1 - (_psp_df_ab["base_cost"]  / _MAX_COST)
-    _psp_df_ab["latency_score"] = 1 - (_psp_df_ab["latency_ms"] / _MAX_LATENCY)
-    _psp_df_ab["combined_score"] = (
-        0.8 * _psp_df_ab["success_rate"] +
-        0.1 * _psp_df_ab["cost_score"]   +
-        0.1 * _psp_df_ab["latency_score"]
-    )
-    _best_lookup = (
-        _psp_df_ab.sort_values("combined_score", ascending=False)
-        .groupby(["country", "payment_method"])["psp"].first().to_dict()
-    )
-    _score_map = _psp_df_ab.groupby("psp")["combined_score"].mean().to_dict()
+    # Load reward from decision_log for avg_reward metric
+    _dl_reward_ab = load_decision_log()
+    mid_dl       = len(_dl_reward_ab) // 2
+    early_reward = _dl_reward_ab.iloc[:mid_dl]["reward"].mean() if "reward" in _dl_reward_ab.columns else None
+    late_reward  = _dl_reward_ab.iloc[mid_dl:]["reward"].mean() if "reward" in _dl_reward_ab.columns else None
 
-    def _ab_stats(group):
-        n = len(group)
-        if n == 0:
-            return {}
-        best_psps    = group.apply(lambda r: _best_lookup.get((r["country"], r["payment_method"])), axis=1)
-        best_scores  = best_psps.map(_score_map).fillna(0)
-        chosen_scores = group["selected_psp"].map(_score_map).fillna(0)
-        regrets      = (best_scores - chosen_scores).clip(lower=0)
-        is_optimal   = (regrets == 0)
-        is_suboptimal = regrets >= 0.05
-        avg_reward   = group["reward"].mean() if "reward" in group.columns and group["reward"].notna().any() else None
+    def _make_stats(slice_df, avg_rew):
         return {
-            "osr":            round(is_optimal.mean() * 100, 2),
-            "avg_regret":     round(regrets.mean(), 6),
-            "pct_suboptimal": round(is_suboptimal.mean() * 100, 2),
-            "avg_reward":     round(avg_reward, 4) if avg_reward is not None else None,
+            "osr":            round(slice_df["is_optimal"].mean() * 100, 2),
+            "avg_regret":     round(slice_df["regret"].mean(), 6),
+            "pct_suboptimal": round((slice_df["regret"] >= 0.05).mean() * 100, 2),
+            "avg_reward":     round(avg_rew, 4) if avg_rew is not None else None,
         }
 
-    total_ab = len(dl_ab)
-    mid_ab   = total_ab // 2
-    a_stats  = _ab_stats(dl_ab.iloc[:mid_ab])
-    b_stats  = _ab_stats(dl_ab.iloc[mid_ab:mid_ab * 2])
+    a_stats = _make_stats(early_df, early_reward)
+    b_stats = _make_stats(late_df,  late_reward)
 
     def _delta(a_val, b_val, lower_is_better=False):
         """Return (improved, delta_str). improved=True means B is better."""
@@ -1167,7 +1168,7 @@ if os.path.exists(DECISION_LOG_PATH):
 
         health_rows.append({
             "PSP":      psp,
-            "Region":   _psp_region.get(psp, "—"),
+            "Region":   _get_region(psp),
             "Baseline": f"{baseline_rate*100:.1f}%",
             "Current":  f"{current_rate*100:.1f}%",
             "Trend":    trend,
@@ -1278,7 +1279,7 @@ psp_meta.columns = ["chosen_psp", "success_rate"]
 psp_perf = psp_perf.merge(psp_meta, on="chosen_psp", how="left")
 
 # Build PSP → region by looking up which countries each PSP appears in
-psp_perf["Region"]         = psp_perf["chosen_psp"].map(_psp_region).fillna("—")
+psp_perf["Region"] = psp_perf["chosen_psp"].apply(_get_region)
 psp_perf["OSR %"]          = psp_perf["osr"].apply(lambda x: f"{x*100:.1f}%")
 psp_perf["Success Rate %"] = psp_perf["success_rate"].apply(lambda x: f"{x*100:.1f}%" if pd.notna(x) else "—")
 psp_perf["Avg Regret"]     = psp_perf["avg_regret"].round(4)
