@@ -367,20 +367,27 @@ osr        = df["is_optimal"].mean()
 
 # ── Country → methods / currency mapping ────────────────────────────────────
 COUNTRY_CONFIG = {
-    "Indonesia":   {"methods": ["GoPay", "OVO", "DANA", "ShopeePay", "BANK_TRANSFER"], "currency": "IDR"},
-    "Philippines": {"methods": ["GCash", "PayMaya", "BANK_TRANSFER"],                   "currency": "PHP"},
-    "Vietnam":     {"methods": ["MoMo", "ZaloPay", "Viettel_Pay"],                      "currency": "VND"},
-    "Thailand":    {"methods": ["PromptPay", "BANK_TRANSFER"],                           "currency": "THB"},
-    "Malaysia":    {"methods": ["FPX", "Touch_n_Go", "BANK_TRANSFER"],                  "currency": "MYR"},
-    "Nigeria":     {"methods": ["BANK_TRANSFER"],                                        "currency": "NGN"},
-    "Kenya":       {"methods": ["M-Pesa", "BANK_TRANSFER"],                              "currency": "KES"},
-    "Ghana":       {"methods": ["MTN_Mobile_Money", "BANK_TRANSFER"],                   "currency": "GHS"},
-    "Tanzania":    {"methods": ["Airtel_Money", "HaloPesa", "BANK_TRANSFER"],           "currency": "TZS"},
-    "EU":          {"methods": ["SEPA", "OPEN_BANKING"],                                 "currency": "EUR"},
-    "Brazil":      {"methods": ["PIX", "BANK_TRANSFER"],                                 "currency": "BRL"},
-    "Mexico":      {"methods": ["SPEI", "BANK_TRANSFER"],                                "currency": "MXN"},
-    "Chile":       {"methods": ["BANK_TRANSFER"],                                        "currency": "CLP"},
-    "USA":         {"methods": ["ACH", "WIRE"],                                          "currency": "USD"},
+    "Nigeria":      {"methods": ["Bank Transfer"],                                    "currency": "NGN"},
+    "Kenya":        {"methods": ["M-Pesa", "Bank Transfer"],                          "currency": "KES"},
+    "Ghana":        {"methods": ["Mobile Money", "Bank Transfer"],                    "currency": "GHS"},
+    "Tanzania":     {"methods": ["Mobile Money", "Bank Transfer"],                    "currency": "TZS"},
+    "Uganda":       {"methods": ["Mobile Money", "Bank Transfer"],                    "currency": "UGX"},
+    "Indonesia":    {"methods": ["Local Wallet", "Bank Transfer"],                    "currency": "IDR"},
+    "Philippines":  {"methods": ["Local Wallet", "Bank Transfer"],                    "currency": "PHP"},
+    "Thailand":     {"methods": ["Thai QR", "Bank Transfer"],                         "currency": "THB"},
+    "Vietnam":      {"methods": ["Local Wallet", "Bank Transfer"],                    "currency": "VND"},
+    "Malaysia":     {"methods": ["FPX", "DuitNow", "Bank Transfer"],                  "currency": "MYR"},
+    "Japan":        {"methods": ["Bank Transfer"],                                    "currency": "JPY"},
+    "Australia":    {"methods": ["Bank Transfer", "Local Wallet"],                    "currency": "AUD"},
+    "EU":           {"methods": ["SEPA", "Open Banking"],                             "currency": "EUR"},
+    "Poland":       {"methods": ["Local Wallet", "Bank Transfer"],                    "currency": "PLN"},
+    "Brazil":       {"methods": ["PIX", "Bank Transfer"],                             "currency": "BRL"},
+    "Mexico":       {"methods": ["SPEI", "Bank Transfer"],                            "currency": "MXN"},
+    "Colombia":     {"methods": ["Bank Transfer", "Local Wallet"],                    "currency": "COP"},
+    "Argentina":    {"methods": ["Bank Transfer", "Local Wallet"],                    "currency": "ARS"},
+    "Chile":        {"methods": ["Bank Transfer", "Local Wallet"],                    "currency": "CLP"},
+    "Peru":         {"methods": ["Bank Transfer", "Local Wallet"],                    "currency": "PEN"},
+    "USA":          {"methods": ["Bank Transfer"],                                    "currency": "USD"},
 }
 
 REGION_MAP = {
@@ -848,7 +855,7 @@ if route_clicked:
     txn = {
         "txn_id":         "live_demo",
         "country":        COUNTRY_TO_CURRENCY.get(country, country),
-        "payment_method": payment_method,
+        "payment_method": payment_method.upper().replace(" ", "_").replace("-", "_"),
         "amount":         amount,
         "time_bucket":    "afternoon",
     }
