@@ -847,7 +847,7 @@ route_clicked = st.button("Route Now →", type="primary", use_container_width=F
 if route_clicked:
     txn = {
         "txn_id":         "live_demo",
-        "country":        country,
+        "country":        COUNTRY_TO_CURRENCY.get(country, country),
         "payment_method": payment_method,
         "amount":         amount,
         "time_bucket":    "afternoon",
