@@ -855,7 +855,7 @@ if route_clicked:
     txn = {
         "txn_id":         "live_demo",
         "country":        COUNTRY_TO_CURRENCY.get(country, country),
-        "payment_method": payment_method.upper().replace(" ", "_").replace("-", "_"),
+        "payment_method": payment_method.upper().replace(" ", "_"),
         "amount":         amount,
         "time_bucket":    "afternoon",
     }
